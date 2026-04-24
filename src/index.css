@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+/* Basic reset and styling for the extracted Codeforces problem statement */
+.cf-statement .header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.cf-statement .title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.cf-statement .time-limit,
+.cf-statement .memory-limit,
+.cf-statement .input-file,
+.cf-statement .output-file {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.cf-statement .property-title {
+  font-weight: bold;
+}
+
+.cf-statement .section-title {
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #e2e8f0;
+}
+
+.cf-statement pre {
+  background-color: #0d1117;
+  border: 1px solid #1e293b;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  overflow-x: auto;
+  white-space: pre;
+  color: #c9d1d9;
+}
+
+.cf-statement .sample-test {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.cf-statement .sample-test .input,
+.cf-statement .sample-test .output {
+  border: 1px solid #1e293b;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.cf-statement .sample-test .input .title,
+.cf-statement .sample-test .output .title {
+  background-color: #0d1117;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  border-bottom: 1px solid #1e293b;
+  margin: 0;
+}
+
+.cf-statement p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+/* MathJax inline styling if present */
+.cf-statement .math {
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+mjx-container:not([display="true"]) {
+  display: inline-block !important;
+}
+
+span.tex-span {
+  display: inline-block !important;
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.cf-statement p > mjx-container[display="true"] {
+  display: inline-block !important;
+}
+
+.solution-content h3 {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #e2e8f0;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.solution-content p {
+  margin-bottom: 1rem;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.solution-content ul, .solution-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: #94a3b8;
+}
+
+.solution-content ul {
+  list-style-type: disc;
+}
+
+.solution-content pre {
+  background-color: #0d1117;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  border: 1px solid #1e293b;
+  margin-bottom: 1rem;
+}
+
+.solution-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  color: #c9d1d9;
+}
+
+

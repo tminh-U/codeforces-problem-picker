@@ -16,8 +16,8 @@ export default function App() {
   const [loadingHandle, setLoadingHandle] = useState(false);
   const [error, setError] = useState<string>('');
 
-  const [minRating, setMinRating] = useState<number>(800);
-  const [maxRating, setMaxRating] = useState<number>(1500);
+  const [minRating, setMinRating] = useState<number | string>(800);
+  const [maxRating, setMaxRating] = useState<number | string>(1500);
 
   const [suggestedProblem, setSuggestedProblem] = useState<CFProblem | null>(null);
   
@@ -77,9 +77,12 @@ export default function App() {
     setOriginalStatement(null);
     setLanguage('en');
 
+    const currentMin = minRating === '' ? 0 : Number(minRating);
+    const currentMax = maxRating === '' ? 4000 : Number(maxRating);
+
     const candidates = problems.filter(p => {
       if (!p.rating) return false;
-      if (p.rating < minRating || p.rating > maxRating) return false;
+      if (p.rating < currentMin || p.rating > currentMax) return false;
       const key = `${p.contestId}-${p.index}`;
       if (solvedProblemKeys.has(key)) return false;
       return true;
@@ -176,7 +179,7 @@ export default function App() {
                   <input 
                     type="number" 
                     value={minRating}
-                    onChange={e => setMinRating(parseInt(e.target.value) || 0)} 
+                    onChange={e => setMinRating(e.target.value === '' ? '' : Number(e.target.value))} 
                     min={0} max={3500} step={100}
                     className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 text-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
@@ -186,7 +189,7 @@ export default function App() {
                   <input 
                     type="number" 
                     value={maxRating}
-                    onChange={e => setMaxRating(parseInt(e.target.value) || 0)} 
+                    onChange={e => setMaxRating(e.target.value === '' ? '' : Number(e.target.value))} 
                     min={0} max={4000} step={100}
                     className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 text-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />

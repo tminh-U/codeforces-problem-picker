@@ -3,6 +3,11 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import * as cheerio from "cheerio";
 import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
+
+// Nạp biến môi trường từ .env.local và .env cho Express server
+dotenv.config({ path: ".env.local" });
+dotenv.config();
 
 // Initialize Gemini
 let ai: GoogleGenAI | null = null;
@@ -136,12 +141,19 @@ Text to translate:
 }`;
 
     const aiResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      }
     });
 
     let responseText = aiResponse.text || "{}";
-    responseText = responseText.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      responseText = responseText.substring(jsonStart, jsonEnd + 1);
+    }
     
     let translatedData = null;
     try {

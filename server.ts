@@ -145,7 +145,7 @@ Text to translate:
 }`;
 
       const aiResponse = await genAI.models.generateContent({
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
 
@@ -171,50 +171,6 @@ Text to translate:
         } : null
       });
 
-    } catch (error: any) {
-      console.error(error);
-      const errorMessage = error.message || String(error);
-      if (errorMessage.includes("API key not valid") || errorMessage.includes("API_KEY_INVALID")) {
-        return res.status(500).json({ error: "Gemini API Key không hợp lệ. Vui lòng kiểm tra lại API key trong phần thiết lập (Settings/Secrets) của AI Studio." });
-      }
-      res.status(500).json({ error: errorMessage });
-    }
-  });
-
-  app.post("/api/problem/solution", async (req, res) => {
-    try {
-      const { title, statementText } = req.body;
-      if (!title || !statementText) return res.status(400).json({ error: "Title and statementText are required" });
-
-      const genAI = initGenAI();
-      if (!genAI) {
-        return res.json({
-          solution: `<p><em>Đây là bản dịch/giải mẫu (Mock API do thiếu cấu hình Gemini API Key). Để xem lời giải chi tiết bằng AI, vui lòng thêm API Key trong mục Settings của AI Studio.</em></p><p>Ý tưởng chung: Phân tích bài toán, tìm thuật toán tối ưu.</p>`
-        });
-      }
-
-      const prompt = `Act as an Expert Competitive Programmer. Read the following problem statement and provide a detailed, easy-to-understand editorial/solution.
-Your explanation should include:
-1. Observations or Key Insights.
-2. The Algorithm/Approach.
-3. Time and Space Complexity.
-4. A snippet of high-level C++ (or pseudo-code) logic if applicable.
-
-IMPORTANT: Provide the ENTIRE explanation in Vietnamese. Format as valid HTML (using <h3>, <p>, <ul>, <pre><code> etc. for structure). Do NOT include markdown blocks like \`\`\`html. Use HTML directly. You may use MathJax ($$$ formula $$$) for math.
-
-Problem Title: ${title}
-Problem Statement: 
-${statementText}`;
-
-      const aiResponse = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
-
-      let responseText = aiResponse.text || "";
-      responseText = responseText.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
-
-      res.json({ solution: responseText });
     } catch (error: any) {
       console.error(error);
       const errorMessage = error.message || String(error);

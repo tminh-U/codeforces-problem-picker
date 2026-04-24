@@ -130,7 +130,7 @@ export default function App() {
         <div className="flex items-center gap-8">
           <div className="text-xl font-bold tracking-tight text-blue-400 flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center text-white font-mono">CF</div>
-            <span>ROAD TO <span className="text-slate-500 font-light italic">SKIBIDI</span></span>
+            <span>SUGGEST <span className="text-slate-500 font-light italic">VN</span></span>
           </div>
           <div className="hidden md:flex gap-6 text-sm font-medium">
             <a href="#" className="text-blue-400 border-b-2 border-blue-400 pb-[18px] mt-[18px]">Gợi ý bài</a>
@@ -283,12 +283,6 @@ export default function App() {
                       {isTranslating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Languages className="w-4 h-4 mr-2" />}
                       {translatedStatement ? "Đã dịch sang TV" : "Dịch Đề"}
                     </Button>
-                    {originalStatement && (
-                      <Button variant="outline" onClick={handleShowSolution} disabled={isFetchingSolution || !!solution} className="px-5 py-2 border border-slate-700 text-slate-300 text-xs font-bold bg-transparent rounded hover:bg-slate-800 transition-all uppercase tracking-wider h-10">
-                        {isFetchingSolution ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Lightbulb className="w-4 h-4 mr-2" />}
-                        Hỏi AI Lời Giải
-                      </Button>
-                    )}
                   </div>
                 </div>
 
@@ -318,9 +312,8 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Content Area */}
+                    {/* Statement Content */}
                     <div className="p-5 md:p-8 space-y-8 mathjax-support cf-statement text-[15px] text-slate-300 leading-relaxed">
-                      
                       {/* Body */}
                       <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.body : originalStatement.body) || '' }} />
                       

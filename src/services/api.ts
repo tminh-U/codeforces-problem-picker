@@ -63,16 +63,3 @@ export async function translateProblem(url: string): Promise<{original: ProblemS
   }
   return res.json();
 }
-
-export async function getSolution(title: string, statementText: string): Promise<{solution: string}> {
-  const res = await fetch('/api/problem/solution', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, statementText })
-  });
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || 'Failed to get solution');
-  }
-  return res.json();
-}

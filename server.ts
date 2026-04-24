@@ -128,6 +128,7 @@ app.post("/api/problem/translate", async (req, res) => {
     const prompt = `Translate the following Codeforces problem sections from English to Vietnamese. 
 Preserve all HTML tags and MathJax ($$$ formula $$$) exactly as they are.
 CRITICAL: Do NOT add newlines or block tags (like <div> or <p>) around inline MathJax ($$$...$$$). You must keep the formulas inline within the text.
+IMPORTANT: Escape all backslashes in MathJax as double backslashes (\\\\) so the output is valid JSON.
 Respond ONLY with a valid JSON object matching the exact keys: "body", "inputSpec", "outputSpec", "note".
 Do NOT include markdown formatting (\`\`\`json).
 
@@ -140,7 +141,7 @@ Text to translate:
 }`;
 
     const aiResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-lite",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -159,6 +160,13 @@ Text to translate:
       translatedData = JSON.parse(responseText);
     } catch (e) {
       console.error("Failed to parse Gemini JSON:", responseText);
+      // Thử tự động sửa lỗi thiếu escape backslash (rất hay gặp với LaTeX)
+      try {
+        const fixedText = responseText.replace(/\\(?!["\\/bfnrt])/g, "\\\\");
+        translatedData = JSON.parse(fixedText);
+      } catch (e2) {
+        console.error("Vẫn lỗi sau khi auto-fix JSON:", e2);
+      }
     }
 
     res.json({ 

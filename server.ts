@@ -1,5 +1,4 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import * as cheerio from "cheerio";
 import { GoogleGenAI } from "@google/genai";
@@ -186,7 +185,8 @@ Text to translate:
 // Setup Vite/Static Serving only if running locally (not Vercel)
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   const setupViteAndListen = async () => {
-    const vite = await createViteServer({
+    const { createServer } = await import("vite");
+    const vite = await createServer({
       server: { middlewareMode: true },
       appType: "spa",
     });

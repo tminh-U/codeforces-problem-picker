@@ -84,6 +84,10 @@
   font-family: Georgia, serif;
 }
 
+mjx-mn, mn, .mjx-mn, .tex-font-style-bf, .tex-span, span.tex-span {
+  color: #fff !important;
+}
+
 mjx-container:not([display="true"]) {
   display: inline-block !important;
 }

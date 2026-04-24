@@ -1,8 +1,12 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
+import { createServer as createViteServer, loadEnv } from "vite";
 import path from "path";
 import * as cheerio from "cheerio";
 import { GoogleGenAI } from "@google/genai";
+
+// Nạp biến môi trường từ .env và .env.local cho Express server
+const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEY || env.GEMINI_API_KEY;
 
 // Initialize Gemini
 let ai: GoogleGenAI | null = null;
@@ -14,11 +18,10 @@ const initGenAI = () => {
   return ai;
 };
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  app.use(express.json());
+app.use(express.json());
 
   // API Routes
   app.get("/api/health", (req, res) => {
@@ -79,6 +82,20 @@ async function startServer() {
         const src = $(el).attr('src');
         if (src && src.startsWith('/')) {
           $(el).attr('src', 'https://codeforces.com' + src);
+        }
+      });
+
+      // Xóa các thuộc tính ép màu (color mặc định của CF) để Frontend áp dụng màu trắng chuẩn xác
+      statement.find('*').each((i, el) => {
+        $(el).removeAttr('color');
+        const style = $(el).attr('style');
+        if (style) {
+          const newStyle = style.replace(/color\s*:[^;]+;?/gi, '');
+          if (newStyle.trim() === '') {
+            $(el).removeAttr('style');
+          } else {
+            $(el).attr('style', newStyle);
+          }
         }
       });
 
@@ -145,7 +162,7 @@ Text to translate:
 }`;
 
       const aiResponse = await genAI.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-flash-lite",
         contents: prompt,
       });
 
@@ -181,25 +198,27 @@ Text to translate:
     }
   });
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+// Setup cho môi trường local (chạy cùng Vite)
+if (process.env.NODE_ENV !== "production") {
+  (async () => {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
-    // In Express v4, use * to serve static files. Express v5 would need *all
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  })();
+} else if (!process.env.VERCEL) {
+  // Setup cho server production (nếu không dùng Vercel)
+  const distPath = path.join(process.cwd(), "dist");
+  app.use(express.static(distPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
   });
+  app.listen(PORT, "0.0.0.0", () => console.log(`Prod server port ${PORT}`));
 }
 
-startServer();
+// Export `app` để Vercel có thể dùng làm Serverless Function
+export default app;

@@ -313,7 +313,7 @@ export default function App() {
                     </div>
 
                     {/* Statement Content */}
-                    <div className="p-5 md:p-8 space-y-8 mathjax-support cf-statement text-[15px] text-slate-300 leading-relaxed">
+                    <div className="p-5 md:p-8 space-y-8 mathjax-support cf-statement text-[15px] text-white leading-relaxed [&_*]:!text-white">
                       {/* Body */}
                       <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.body : originalStatement.body) || '' }} />
                       
@@ -342,12 +342,12 @@ export default function App() {
                               <div key={idx} className="flex flex-col md:flex-row border border-slate-800 rounded-lg overflow-hidden font-mono text-[13px]">
                                 <div className="flex-1 w-full md:w-1/2">
                                   <div className="bg-[#161b22] px-4 py-2 border-b border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">Input</div>
-                                  <div className="p-4 bg-[#0d1117] text-slate-300 overflow-x-auto whitespace-pre font-mono" dangerouslySetInnerHTML={{ __html: sample.input }} />
+                                  <div className="p-4 bg-[#0d1117] text-white overflow-x-auto whitespace-pre font-mono [&_*]:!text-white" dangerouslySetInnerHTML={{ __html: sample.input }} />
                                 </div>
                                 <div className="w-full h-px md:w-px md:h-auto bg-slate-800"></div>
                                 <div className="flex-1 w-full md:w-1/2 md:border-t-0">
                                   <div className="bg-[#161b22] px-4 py-2 border-b border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">Output</div>
-                                  <div className="p-4 bg-[#0d1117] text-slate-300 overflow-x-auto whitespace-pre font-mono" dangerouslySetInnerHTML={{ __html: sample.output }} />
+                                  <div className="p-4 bg-[#0d1117] text-white overflow-x-auto whitespace-pre font-mono [&_*]:!text-white" dangerouslySetInnerHTML={{ __html: sample.output }} />
                                 </div>
                               </div>
                             ))}

@@ -20,6 +20,7 @@ export default function App() {
   const [maxRating, setMaxRating] = useState<number | string>(1500);
 
   const [suggestedProblem, setSuggestedProblem] = useState<CFProblem | null>(null);
+  const [showTags, setShowTags] = useState(false);
   
   // Translation state
   const [isTranslating, setIsTranslating] = useState(false);
@@ -76,6 +77,7 @@ export default function App() {
     setTranslatedStatement(null);
     setOriginalStatement(null);
     setLanguage('en');
+    setShowTags(false);
 
     const currentMin = minRating === '' ? 0 : Number(minRating);
     const currentMax = maxRating === '' ? 4000 : Number(maxRating);
@@ -265,13 +267,22 @@ export default function App() {
                   <h2 className="text-2xl font-bold text-white mb-3 max-w-[85%] pr-8">
                     {suggestedProblem.contestId}{suggestedProblem.index}. {suggestedProblem.name}
                   </h2>
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {suggestedProblem.tags.map(t => (
+                <div className="flex flex-wrap gap-2 mb-6 items-center">
+                  {showTags ? (
+                    suggestedProblem.tags.map(t => (
                       <span key={t} className="px-2 py-0.5 bg-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-wider rounded">
                         {t}
                       </span>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <button 
+                      onClick={() => setShowTags(true)}
+                      className="px-3 py-1 bg-slate-800/50 hover:bg-slate-800 text-slate-500 hover:text-slate-300 text-[10px] uppercase font-bold tracking-wider rounded border border-slate-700 border-dashed transition-colors"
+                    >
+                      Nhấn để xem Tags
+                    </button>
+                  )}
+                </div>
 
                   <div className="flex flex-wrap gap-3">
                     <a 

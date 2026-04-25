@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ActivityGraph } from '@/components/ActivityGraph';
 import { CFSubmission, CFProblem, getUserSubmissions, getAllProblems, translateProblem } from '@/services/api';
 import { Search, Shuffle, Languages, CheckCircle2, ChevronRight, Loader2, Sparkles } from 'lucide-react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 export default function App() {
   const [handle, setHandle] = useState<string>('');
@@ -384,6 +385,7 @@ export default function App() {
 
           </section>
       </main>
+      <SpeedInsights />
     </div>
   );
 }

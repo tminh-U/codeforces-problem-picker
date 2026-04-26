@@ -127,6 +127,7 @@ export default function App() {
   const handleTranslateToVietnamese = async () => {
     if (!suggestedProblem) return;
     setIsTranslating(true);
+    setLanguage('vi');
     setError('');
     const url = `https://codeforces.com/contest/${suggestedProblem.contestId}/problem/${suggestedProblem.index}`;
     try {
@@ -140,12 +141,13 @@ export default function App() {
       setOriginalStatement(data.original);
       if (data.translated) {
         setTranslatedStatement(data.translated);
-        setLanguage('vi');
       } else {
         setError('Không thể dịch tự động do thiếu thiết lập API Key hoặc lỗi dịch thuật. Vui lòng kiểm tra lại API Key trong cửa sổ Settings.');
+        setLanguage('en');
       }
     } catch (e: any) {
       setError('Lỗi khi dịch: ' + e.message);
+      setLanguage('en');
     } finally {
       setIsTranslating(false);
     }
@@ -364,53 +366,63 @@ export default function App() {
 
                     {/* Statement Content */}
                     <div className="p-5 md:p-8 space-y-8 mathjax-support cf-statement text-[15px] text-slate-300 leading-relaxed">
-                      {/* Body */}
-                      <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.body : originalStatement.body) || '' }} />
-                      
-                      {/* Input */}
-                      {((language === 'vi' && translatedStatement ? translatedStatement.inputSpec : originalStatement.inputSpec) || '') !== '' && (
-                        <div>
-                          <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Dữ liệu vào / Input</h3>
-                          <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.inputSpec : originalStatement.inputSpec) || '' }} />
+                      {language === 'vi' && isTranslating ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                          <Loader2 className="w-10 h-10 animate-spin mb-4 text-blue-500" />
+                          <p className="font-bold text-lg text-slate-200">Đang dịch sang Tiếng Việt...</p>
+                          <p className="text-sm mt-2 text-slate-500">Vui lòng chờ trong giây lát (có thể mất vài giây tùy độ dài đề bài).</p>
                         </div>
-                      )}
+                      ) : (
+                        <>
+                          {/* Body */}
+                          <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.body : originalStatement.body) || '' }} />
+                          
+                          {/* Input */}
+                          {((language === 'vi' && translatedStatement ? translatedStatement.inputSpec : originalStatement.inputSpec) || '') !== '' && (
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Dữ liệu vào / Input</h3>
+                              <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.inputSpec : originalStatement.inputSpec) || '' }} />
+                            </div>
+                          )}
 
-                      {/* Output */}
-                      {((language === 'vi' && translatedStatement ? translatedStatement.outputSpec : originalStatement.outputSpec) || '') !== '' && (
-                        <div>
-                          <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Dữ liệu ra / Output</h3>
-                          <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.outputSpec : originalStatement.outputSpec) || '' }} />
-                        </div>
-                      )}
+                          {/* Output */}
+                          {((language === 'vi' && translatedStatement ? translatedStatement.outputSpec : originalStatement.outputSpec) || '') !== '' && (
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Dữ liệu ra / Output</h3>
+                              <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.outputSpec : originalStatement.outputSpec) || '' }} />
+                            </div>
+                          )}
 
-                      {/* Samples - Always Original (never translated to break format) */}
-                      {originalStatement.samples.length > 0 && (
-                        <div>
-                          <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Ví dụ / Example</h3>
-                          <div className="space-y-4">
-                            {originalStatement.samples.map((sample, idx) => (
-                              <div key={idx} className="flex flex-col md:flex-row border border-slate-800 rounded-lg overflow-hidden font-mono text-[13px]">
-                                <div className="flex-1 w-full md:w-1/2">
-                                  <div className="bg-[#161b22] px-4 py-2 border-b border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">Input</div>
-                                  <div className="p-4 bg-[#0d1117] text-slate-300 overflow-x-auto whitespace-pre font-mono" dangerouslySetInnerHTML={{ __html: sample.input }} />
-                                </div>
-                                <div className="w-full h-px md:w-px md:h-auto bg-slate-800"></div>
-                                <div className="flex-1 w-full md:w-1/2 md:border-t-0">
-                                  <div className="bg-[#161b22] px-4 py-2 border-b border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">Output</div>
-                                  <div className="p-4 bg-[#0d1117] text-slate-300 overflow-x-auto whitespace-pre font-mono" dangerouslySetInnerHTML={{ __html: sample.output }} />
-                                </div>
+                          {/* Samples - Always Original (never translated to break format) */}
+                          {originalStatement.samples.length > 0 && (
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Ví dụ / Example</h3>
+                              <div className="space-y-4">
+                                {originalStatement.samples.map((sample, idx) => (
+                                  <div key={idx} className="flex flex-col md:flex-row border border-slate-800 rounded-lg overflow-hidden font-mono text-[13px]">
+                                    <div className="flex-1 w-full md:w-1/2">
+                                      <div className="bg-[#161b22] px-4 py-2 border-b border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">Input</div>
+                                      <div className="p-4 bg-[#0d1117] text-slate-300 overflow-x-auto whitespace-pre font-mono" dangerouslySetInnerHTML={{ __html: sample.input }} />
+                                    </div>
+                                    <div className="w-full h-px md:w-px md:h-auto bg-slate-800"></div>
+                                    <div className="flex-1 w-full md:w-1/2 md:border-t-0">
+                                      <div className="bg-[#161b22] px-4 py-2 border-b border-slate-800 text-slate-500 font-bold uppercase tracking-wider text-[10px]">Output</div>
+                                      <div className="p-4 bg-[#0d1117] text-slate-300 overflow-x-auto whitespace-pre font-mono" dangerouslySetInnerHTML={{ __html: sample.output }} />
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                            </div>
+                          )}
 
-                      {/* Note */}
-                      {(language === 'vi' && translatedStatement ? translatedStatement.note : originalStatement.note) && (
-                        <div>
-                          <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Giải thích / Note</h3>
-                          <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.note : originalStatement.note) || '' }} />
-                        </div>
+                          {/* Note */}
+                          {(language === 'vi' && translatedStatement ? translatedStatement.note : originalStatement.note) && (
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-100 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Giải thích / Note</h3>
+                              <div dangerouslySetInnerHTML={{ __html: (language === 'vi' && translatedStatement ? translatedStatement.note : originalStatement.note) || '' }} />
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>

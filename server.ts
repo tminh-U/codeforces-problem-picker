@@ -52,7 +52,7 @@ app.get("/api/cf/problemset.problems", async (req, res) => {
 // Scrape and Translate Problem Statement
 app.post("/api/problem/translate", async (req, res) => {
   try {
-    const { url } = req.body;
+    const { url, skipTranslation } = req.body;
     if (!url) return res.status(400).json({ error: "URL is required" });
 
     // Use mirror to avoid Cloudflare block
@@ -109,6 +109,14 @@ app.post("/api/problem/translate", async (req, res) => {
       samples,
       note: noteHtml
     };
+
+    // Nếu frontend chỉ yêu cầu lấy đề tiếng Anh, bỏ qua phần dịch bằng Gemini API
+    if (skipTranslation) {
+      return res.json({
+        original: originalStructured,
+        translated: null
+      });
+    }
 
     const genAI = initGenAI();
     if (!genAI) {

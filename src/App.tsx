@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ActivityGraph } from '@/components/ActivityGraph';
-import { CFSubmission, CFProblem, getUserSubmissions, getAllProblems, translateProblem } from '@/services/api';
-import { Search, Shuffle, Languages, CheckCircle2, ChevronRight, Loader2, Sparkles } from 'lucide-react';
+import { CFSubmission, CFProblem, getUserSubmissions, getAllProblems } from '@/services/api';
+import { Search, Shuffle, Languages, CheckCircle2, ChevronRight, Loader2, Sparkles, FileText } from 'lucide-react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -26,6 +26,7 @@ export default function App() {
   
   // Translation state
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isFetchingStatement, setIsFetchingStatement] = useState(false);
   const [translatedStatement, setTranslatedStatement] = useState<ProblemStatement | null>(null);
   const [originalStatement, setOriginalStatement] = useState<ProblemStatement | null>(null);
   const [language, setLanguage] = useState<'en' | 'vi'>('en');
@@ -101,19 +102,46 @@ export default function App() {
     setSuggestedProblem(candidates[rnd]);
   };
 
-  const handleTranslate = async () => {
+  const handleViewStatement = async () => {
+    if (!suggestedProblem) return;
+    setIsFetchingStatement(true);
+    setError('');
+    const url = `https://codeforces.com/contest/${suggestedProblem.contestId}/problem/${suggestedProblem.index}`;
+    try {
+      const res = await fetch('/api/problem/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, skipTranslation: true })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setOriginalStatement(data.original);
+      setLanguage('en');
+    } catch (e: any) {
+      setError('Lỗi khi tải đề: ' + e.message);
+    } finally {
+      setIsFetchingStatement(false);
+    }
+  };
+
+  const handleTranslateToVietnamese = async () => {
     if (!suggestedProblem) return;
     setIsTranslating(true);
     setError('');
     const url = `https://codeforces.com/contest/${suggestedProblem.contestId}/problem/${suggestedProblem.index}`;
     try {
-      const data = await translateProblem(url);
+      const res = await fetch('/api/problem/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
       setOriginalStatement(data.original);
       if (data.translated) {
         setTranslatedStatement(data.translated);
         setLanguage('vi');
       } else {
-        // Translation was returned as null
         setError('Không thể dịch tự động do thiếu thiết lập API Key hoặc lỗi dịch thuật. Vui lòng kiểm tra lại API Key trong cửa sổ Settings.');
       }
     } catch (e: any) {
@@ -295,9 +323,9 @@ export default function App() {
                     >
                       Làm bài trên CF <ChevronRight className="w-4 h-4 ml-1 shrink-0" />
                     </a>
-                    <Button variant="outline" onClick={handleTranslate} disabled={isTranslating || !!translatedStatement} className="px-5 py-2 border border-slate-700 text-slate-300 text-xs font-bold bg-transparent rounded hover:bg-slate-800 transition-all uppercase tracking-wider h-10">
-                      {isTranslating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Languages className="w-4 h-4 mr-2" />}
-                      {translatedStatement ? "Đã dịch sang TV" : "Dịch Đề"}
+                    <Button variant="outline" onClick={handleViewStatement} disabled={isFetchingStatement || !!originalStatement} className="px-5 py-2 border border-slate-700 text-slate-300 text-xs font-bold bg-transparent rounded hover:bg-slate-800 transition-all uppercase tracking-wider h-10">
+                      {isFetchingStatement ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
+                      {originalStatement ? "Đã tải đề" : "Xem Đề"}
                     </Button>
                   </div>
                 </div>
@@ -314,10 +342,16 @@ export default function App() {
                        <div className="flex p-0.5 bg-[#0d1117] rounded border border-slate-800 shrink-0">
                         <button 
                           className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ${language === 'vi' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                          onClick={() => setLanguage('vi')}
-                          disabled={!translatedStatement}
+                          onClick={() => {
+                            if (!translatedStatement) {
+                              handleTranslateToVietnamese();
+                            } else {
+                              setLanguage('vi');
+                            }
+                          }}
+                          disabled={isTranslating}
                         >
-                          Tiếng Việt (AI)
+                          {isTranslating ? 'Đang dịch...' : 'Tiếng Việt (AI)'}
                         </button>
                         <button 
                           className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded transition-colors ${language === 'en' ? 'bg-slate-800 text-slate-200' : 'text-slate-500 hover:text-slate-300'}`}

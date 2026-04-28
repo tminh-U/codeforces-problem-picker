@@ -20,6 +20,7 @@ export default function App() {
 
   const [minRating, setMinRating] = useState<number | string>(800);
   const [maxRating, setMaxRating] = useState<number | string>(1500);
+  const [minContestId, setMinContestId] = useState<number>(1);
 
   const [suggestedProblem, setSuggestedProblem] = useState<CFProblem | null>(null);
   const [showTags, setShowTags] = useState(false);
@@ -75,6 +76,11 @@ export default function App() {
     return set;
   }, [submissions]);
 
+  const maxAvailableContestId = useMemo(() => {
+    if (problems.length === 0) return 2000;
+    return Math.max(...problems.map(p => p.contestId || 1));
+  }, [problems]);
+
   const suggestProblem = () => {
     setSuggestedProblem(null);
     setTranslatedStatement(null);
@@ -88,6 +94,7 @@ export default function App() {
     const candidates = problems.filter(p => {
       if (!p.rating) return false;
       if (p.rating < currentMin || p.rating > currentMax) return false;
+      if (p.contestId && p.contestId < minContestId) return false;
       const key = `${p.contestId}-${p.index}`;
       if (solvedProblemKeys.has(key)) return false;
       return true;
@@ -204,7 +211,7 @@ export default function App() {
             )}
 
             <section>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
                 Bộ lọc độ khó (Rating)
               </h3>
               <div className="flex gap-3 mb-4">
@@ -228,6 +235,24 @@ export default function App() {
                     className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500 text-slate-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
+              </div>
+
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 mt-5">
+                Thời gian (Contest ID)
+              </h3>
+              <div className="mb-6">
+                <div className="flex justify-between items-center text-[10px] text-slate-500 mb-2">
+                  <span>Cũ nhất (ID: {minContestId})</span>
+                  <span>Mới nhất (ID: {maxAvailableContestId})</span>
+                </div>
+                <input 
+                  type="range" 
+                  min={1} 
+                  max={maxAvailableContestId} 
+                  value={minContestId} 
+                  onChange={(e) => setMinContestId(Number(e.target.value))} 
+                  className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500" 
+                />
               </div>
               <button 
                 className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium text-sm transition-colors flex items-center justify-center disabled:opacity-50"

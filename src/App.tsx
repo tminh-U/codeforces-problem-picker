@@ -9,6 +9,18 @@ import { Search, Shuffle, Languages, CheckCircle2, ChevronRight, Loader2, Sparkl
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
 
+// Hàm ước lượng Contest ID nhỏ nhất dựa theo năm
+const getMinContestIdForYear = (year: number) => {
+  const yearMap: Record<number, number> = {
+    2010: 1, 2011: 54, 2012: 140, 2013: 260, 2014: 380,
+    2015: 500, 2016: 615, 2017: 750, 2018: 910, 2019: 1100,
+    2020: 1280, 2021: 1470, 2022: 1620, 2023: 1780, 2024: 1920, 2025: 2050
+  };
+  if (yearMap[year]) return yearMap[year];
+  if (year < 2010) return 1;
+  return 2050 + (year - 2025) * 150;
+};
+
 export default function App() {
   const [handle, setHandle] = useState<string>('');
   const [activeHandle, setActiveHandle] = useState<string>('');
@@ -20,7 +32,8 @@ export default function App() {
 
   const [minRating, setMinRating] = useState<number | string>(800);
   const [maxRating, setMaxRating] = useState<number | string>(1500);
-  const [minContestId, setMinContestId] = useState<number>(1);
+  const [minYear, setMinYear] = useState<number>(2010);
+  const currentYear = new Date().getFullYear();
 
   const [suggestedProblem, setSuggestedProblem] = useState<CFProblem | null>(null);
   const [showTags, setShowTags] = useState(false);
@@ -76,11 +89,6 @@ export default function App() {
     return set;
   }, [submissions]);
 
-  const maxAvailableContestId = useMemo(() => {
-    if (problems.length === 0) return 2000;
-    return Math.max(...problems.map(p => p.contestId || 1));
-  }, [problems]);
-
   const suggestProblem = () => {
     setSuggestedProblem(null);
     setTranslatedStatement(null);
@@ -90,11 +98,12 @@ export default function App() {
 
     const currentMin = minRating === '' ? 0 : Number(minRating);
     const currentMax = maxRating === '' ? 4000 : Number(maxRating);
+    const mappedMinContestId = getMinContestIdForYear(minYear);
 
     const candidates = problems.filter(p => {
       if (!p.rating) return false;
       if (p.rating < currentMin || p.rating > currentMax) return false;
-      if (p.contestId && p.contestId < minContestId) return false;
+      if (p.contestId && p.contestId < mappedMinContestId) return false;
       const key = `${p.contestId}-${p.index}`;
       if (solvedProblemKeys.has(key)) return false;
       return true;
@@ -238,19 +247,19 @@ export default function App() {
               </div>
 
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 mt-5">
-                Thời gian (Contest ID)
+                Thời gian (Từ năm)
               </h3>
               <div className="mb-6">
                 <div className="flex justify-between items-center text-[10px] text-slate-500 mb-2">
-                  <span>Cũ nhất (ID: {minContestId})</span>
-                  <span>Mới nhất (ID: {maxAvailableContestId})</span>
+                  <span>Từ năm: {minYear}</span>
+                  <span>Hiện tại: {currentYear}</span>
                 </div>
                 <input 
                   type="range" 
-                  min={1} 
-                  max={maxAvailableContestId} 
-                  value={minContestId} 
-                  onChange={(e) => setMinContestId(Number(e.target.value))} 
+                  min={2010} 
+                  max={currentYear} 
+                  value={minYear} 
+                  onChange={(e) => setMinYear(Number(e.target.value))} 
                   className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500" 
                 />
               </div>

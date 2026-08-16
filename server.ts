@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import vm from "node:vm";
 import * as cheerio from "cheerio";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
@@ -7,6 +8,90 @@ import dotenv from "dotenv";
 // Nạp biến môi trường từ .env.local và .env cho Express server
 dotenv.config({ path: ".env.local" });
 dotenv.config();
+
+// Cached cookie cho mirror của Codeforces
+let cachedCfCookie = "";
+
+async function fetchCodeforcesHtml(originalUrl: string): Promise<string> {
+  const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+  
+  // Chuẩn hóa URL sang contest URL (vì mirror chỉ hỗ trợ contest URL)
+  let contestUrl = originalUrl;
+  const psMatch = originalUrl.match(/\/problemset\/problem\/(\d+)\/([A-Za-z0-9]+)/);
+  if (psMatch) {
+    contestUrl = `https://codeforces.com/contest/${psMatch[1]}/problem/${psMatch[2]}`;
+  }
+
+  const mirrors = ["m1.codeforces.com", "m3.codeforces.com"];
+
+  for (const host of mirrors) {
+    const fetchUrl = contestUrl.replace(/codeforces\.com|mirror\.codeforces\.com/, host);
+    try {
+      // 1. Thử dùng cached cookie trước nếu có
+      if (cachedCfCookie) {
+        const res = await fetch(fetchUrl, {
+          headers: { "User-Agent": userAgent, "Cookie": cachedCfCookie }
+        });
+        const html = await res.text();
+        if (html.includes("problem-statement")) {
+          return html;
+        }
+      }
+
+      // 2. Tải trang lần đầu để nhận thử thách PoW JS
+      const res = await fetch(fetchUrl, { headers: { "User-Agent": userAgent } });
+      const html = await res.text();
+      if (html.includes("problem-statement")) {
+        return html;
+      }
+
+      // 3. Giải thử thách PoW nếu có script
+      const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
+      if (scriptMatch) {
+        const cookieJar: Record<string, string> = {};
+        const rawCookies = res.headers.getSetCookie ? res.headers.getSetCookie() : [res.headers.get("set-cookie")];
+        rawCookies.filter(Boolean).forEach(c => {
+          const [pair] = (c as string).split(";");
+          const eqIdx = pair.indexOf("=");
+          if (eqIdx !== -1) cookieJar[pair.slice(0, eqIdx).trim()] = pair.slice(eqIdx + 1).trim();
+        });
+
+        const sandbox = {
+          setTimeout: (fn: Function) => fn(),
+          location: { reload: () => {}, href: fetchUrl },
+          document: {
+            get cookie() {
+              return Object.entries(cookieJar).map(([k, v]) => `${k}=${v}`).join("; ");
+            },
+            set cookie(val: string) {
+              const [pair] = val.split(";");
+              const eqIdx = pair.indexOf("=");
+              if (eqIdx !== -1) cookieJar[pair.slice(0, eqIdx).trim()] = pair.slice(eqIdx + 1).trim();
+            }
+          },
+          window: {}
+        };
+        sandbox.window = sandbox;
+
+        vm.runInNewContext(scriptMatch[1], sandbox);
+
+        const cookieHeader = Object.entries(cookieJar).map(([k, v]) => `${k}=${v}`).join("; ");
+        const secondRes = await fetch(fetchUrl, {
+          headers: { "User-Agent": userAgent, "Cookie": cookieHeader }
+        });
+        const secondHtml = await secondRes.text();
+        if (secondHtml.includes("problem-statement")) {
+          cachedCfCookie = cookieHeader;
+          return secondHtml;
+        }
+      }
+    } catch (e: any) {
+      console.warn(`Lỗi mirror ${host}:`, e?.message || e);
+    }
+  }
+
+  throw new Error("Không thể tải nội dung đề bài từ mirror Codeforces (tất cả mirrors đều không phản hồi)");
+}
 
 // Initialize Gemini
 let ai: GoogleGenAI | null = null;
@@ -55,17 +140,7 @@ app.post("/api/problem/translate", async (req, res) => {
     const { url, skipTranslation } = req.body;
     if (!url) return res.status(400).json({ error: "URL is required" });
 
-    // Use mirror to avoid Cloudflare block
-    const fetchUrl = url.replace("codeforces.com", "mirror.codeforces.com");
-
-    const response = await fetch(fetchUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-      }
-    });
-    const html = await response.text();
+    const html = await fetchCodeforcesHtml(url);
     const $ = cheerio.load(html);
 
     let statement = $(".problem-statement");

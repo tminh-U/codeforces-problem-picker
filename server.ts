@@ -149,7 +149,7 @@ Text to translate:
 }`;
 
     const aiResponse = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-lite",
+      model: "gemini-3.5-flash-lite",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

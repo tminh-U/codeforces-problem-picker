@@ -2,8 +2,8 @@
 
 A lightweight personal utility to quickly find and filter unsolved Codeforces problems by rating and tags.
 
-> **Note:** This is a small weekend mini-project built with AI assistance (vibe-coded using Google AI Studio / Gemini API) to streamline daily problem selection for competitive programming practice.
-
+> **Note:** Just a vibe-coding project after my friends asked for it :v
+> 
 ## Live Demo
 [https://your-app.vercel.app](https://your-app.vercel.app)
 

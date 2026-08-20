@@ -3,9 +3,6 @@
 A lightweight personal utility to quickly find and filter unsolved Codeforces problems by rating and tags.
 
 > **Note:** Just a vibe-coding project after my friends asked for it :v
-> 
-## Live Demo
-[https://your-app.vercel.app](https://your-app.vercel.app)
 
 ## Overview
 During Codeforces practice sessions, manually finding unsolved problems within a specific rating range (e.g., 1600–2100) can be tedious. This tool automates the process by querying the Codeforces public API and providing quick problem hints.

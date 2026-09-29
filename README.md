@@ -18,7 +18,7 @@ During Codeforces practice sessions, manually finding unsolved problems within a
 - Tailwind CSS
 - Codeforces REST API
 - Google Gemini API
-- Deployed on Vercel
+- Deployed on Vercel: [https://cppvn.vercel.app](https://cppvn.vercel.app)
 
 ## Local Setup
 
@@ -29,5 +29,6 @@ During Codeforces practice sessions, manually finding unsolved problems within a
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/tminh-U/your-repo-name.git](https://github.com/tminh-U/your-repo-name.git)
-   cd your-repo-name
+   git clone https://github.com/tminh-U/codeforces-problem-picker.git
+   cd codeforces-problem-picker
+

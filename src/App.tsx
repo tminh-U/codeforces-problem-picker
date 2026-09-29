@@ -280,7 +280,7 @@ export default function App() {
               <div className="bg-[#161b22] border border-slate-800 p-4 rounded text-xs text-slate-400 space-y-3 leading-relaxed">
                 <p>1. Nhập Handle để hệ thống bỏ qua các bài đã làm.</p>
                 <p>2. Chọn độ khó để luyện tập.</p>
-                <p>3. Dùng nút <strong className="text-slate-300">Dịch Đề</strong> để nhờ AI dịch bài sang tiếng Việt (giữ nguyên công thức toán).</p>
+                <p>3. Dùng nút <strong className="text-slate-300">Dịch Đề</strong> để nhờ AI dịch bài sang tiếng Việt.</p>
               </div>
             </section>
           </aside>
